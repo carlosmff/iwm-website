@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IWM — Integrated WorkForce Management</title>
+
+<style>
+:root{
+  --bg:#020617;
+  --panel:#020617cc;
+  --primary:#00e5ff;
+  --secondary:#00ff9c;
+  --text:#e5e7eb;
+  --muted:#94a3b8;
+  --danger:#ef4444;
+}
+
+*{margin:0;padding:0;box-sizing:border-box}
+
+body{
+  font-family: monospace;
+  background: radial-gradient(1200px 600px at 10% 10%, #00111a 0%, transparent 60%),
+              radial-gradient(800px 400px at 90% 20%, #001a12 0%, transparent 60%),
+              var(--bg);
+  color:var(--text);
+  overflow-x:hidden;
+}
+
+/* GRID */
+.grid{
+  position:fixed; inset:0;
+  background-image:
+    linear-gradient(to right, rgba(255,255,255,.05) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255,255,255,.05) 1px, transparent 1px);
+  background-size:40px 40px;
+  animation:gridMove 30s linear infinite;
+  opacity:.25;
+}
+@keyframes gridMove{
+  from{background-position:0 0}
+  to{background-position:40px 40px}
+}
+
+/* ENERGY LINES */
+.lines{
+  position:fixed; inset:0;
+}
+.line{
+  position:absolute;
+  width:140%;
+  height:2px;
+  background:linear-gradient(90deg,transparent,var(--primary),transparent);
+  animation:sweep 6s linear infinite;
+}
+.line.alt{
+  background:linear-gradient(90deg,transparent,var(--secondary),transparent);
+  animation-duration:8s;
+}
+@keyframes sweep{
+  0%{transform:translateY(-20vh)}
+  100%{transform:translateY(120vh)}
+}
+
+/* CURSOR GLOW */
+.cursor-glow{
+  position:fixed;
+  width:300px;height:300px;
+  background:radial-gradient(circle, rgba(0,229,255,.15), transparent 70%);
+  pointer-events:none;
+  transform:translate(-50%,-50%);
+}
+
+/* HEADER */
+header{
+  display:flex;
+  justify-content:space-between;
+  padding:20px;
+  border-bottom:1px solid rgba(255,255,255,.05);
+  backdrop-filter:blur(6px);
+}
+
+.btn{
+  border:1px solid var(--primary);
+  padding:10px 15px;
+  color:var(--primary);
+  text-decoration:none;
+  border-radius:6px;
+  cursor:pointer;
+}
+.btn:hover{
+  background:var(--primary);
+  color:#000;
+}
+
+/* PANEL */
+main{
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  height:calc(100vh - 100px);
+}
+
+.panel{
+  background:var(--panel);
+  padding:30px;
+  border-radius:12px;
+  border:1px solid rgba(255,255,255,.05);
+  width:90%;
+  max-width:900px;
+}
+
+/* TITLE */
+.title{
+  font-size:36px;
+}
+.title span{
+  color:var(--primary);
+  text-shadow:0 0 10px var(--primary);
+  animation:pulse 2.5s infinite;
+}
+@keyframes pulse{
+  50%{opacity:.6}
+}
+
+.subtitle{
+  color:var(--muted);
+  margin:15px 0 25px;
+}
+
+/* CARDS */
+.grid3{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
+  gap:15px;
+}
+.card{
+  border:1px solid rgba(255,255,255,.05);
+  padding:15px;
+  border-radius:10px;
+  transition:.2s;
+}
+.card:hover{
+  border-color:var(--primary);
+  box-shadow:0 0 20px rgba(0,229,255,.2);
+}
+
+/* TERMINAL */
+.terminal{
+  margin-top:20px;
+  border:1px solid rgba(255,255,255,.05);
+  border-radius:10px;
+  overflow:hidden;
+}
+.term-body{
+  padding:12px;
+  font-size:12px;
+}
+
+/* FOOTER */
+footer{
+  text-align:center;
+  padding:10px;
+  color:var(--muted);
+}
+
+/* NOISE */
+body::after{
+  content:'';
+  position:fixed;
+  inset:0;
+  background:url('https://grainy-gradients.vercel.app/noise.svg');
+  opacity:.05;
+  pointer-events:none;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="grid"></div>
+
+<div class="lines">
+  <div class="line" style="top:-10%"></div>
+  <div class="line alt" style="top:-40%"></div>
+</div>
+
+<header>
+  <div>IWM // POWER GRID OPERATIONS</div>
+  <a href="https://portal.iwm.pt" class="btn">PORTAL</a>
+</header>
+
+<main>
+<div class="panel">
+
+<h1 class="title">Gestão de <span>Avarias da Rede Elétrica</span></h1>
+<p class="subtitle">Registo de Operação de Avarias BT/MT</p>
+
+<div class="grid3">
+  <div class="card">BT / MT</div>
+  <div class="card">Equipas</div>
+  <div class="card">Monitorização</div>
+</div>
+
+<div class="terminal">
+  <div class="term-body" id="term"></div>
+</div>
+
+<div style="margin-top:20px">
+  <button class="btn" id="accessBtn">ACEDER AO PORTAL IWM</button>
+</div>
+
+</div>
+</main>
+
+<footer>© 2026 IWM</footer>
+
+<script>
+
+// CURSOR GLOW
+const glow=document.createElement('div');
+glow.className='cursor-glow';
+document.body.appendChild(glow);
+
+window.addEventListener('mousemove',e=>{
+  glow.style.left=e.clientX+'px';
+  glow.style.top=e.clientY+'px';
+});
+
+// TERMINAL
+const term=document.getElementById('term');
+const logs=[
+  '[INFO] Grid scan',
+  '[WARN] Voltage fluctuation',
+  '[ALERT] Fault detected',
+  '[ACTION] Dispatch team',
+  '[SUCCESS] Restored'
+];
+
+setInterval(()=>{
+  let txt=logs[Math.floor(Math.random()*logs.length)];
+  let d=document.createElement('div');
+
+  let color='#94a3b8';
+  if(txt.includes('ALERT')) color='#ef4444';
+  if(txt.includes('WARN')) color='#f59e0b';
+  if(txt.includes('SUCCESS')) color='#22c55e';
+
+  d.innerHTML=`<span style="color:${color}">${new Date().toLocaleTimeString()} ${txt}</span>`;
+  term.appendChild(d);
+
+  if(term.children.length>10) term.removeChild(term.children[0]);
+},1200);
+
+// ACCESS BUTTON
+const btn=document.getElementById('accessBtn');
+btn.addEventListener('click',()=>{
+  btn.textContent='CONNECTING...';
+  setTimeout(()=>btn.textContent='AUTHORIZING...',800);
+  setTimeout(()=>window.location.href='https://portal.iwm.pt',1600);
+});
+
+</script>
+
+</body>
+</html>
